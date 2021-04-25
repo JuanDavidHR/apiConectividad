@@ -13,19 +13,25 @@ class PersonaController extends Controller
         $criterio = $request->criterio;
         if ($buscar==''){
             $personas = User::join('personas', 'users.idPersona', '=', 'personas.idPersona')
+            ->join('tipo', 'personas.idTipo', '=', 'tipo.idTipo')
+            ->join('area', 'users.idArea', '=', 'area.idArea')
             ->join('rol', 'users.idRol', '=', 'rol.idRol')
             ->select('personas.idPersona', 'personas.nombre', 'personas.tipo_documento',
             'personas.num_documento', 'personas.direccion', 'personas.telefono',
-            'users.email', 'users.password', 'users.vigencia', 'users.idRol', 'rol.nombre as rol')
+            'users.email', 'users.password', 'users.vigencia', 'users.idRol', 'rol.nombre as rol',
+            'personas.idTipo', 'tipo.nombre as Tipo de Persona','personas.idArea', 'area.nombre as Area de Policia')
             ->orderBy('personas.idPersona', 'desc')
             ->paginate(5);
         }
         else{
             $personas = User::join('personas', 'users.idPersona', '=', 'personas.idPersona')
+            ->join('tipo', 'personas.idTipo', '=', 'tipo.idTipo')
+            ->join('area', 'personas.idArea', '=', 'area.idArea')
             ->join('rol', 'users.idRol', '=', 'rol.idRol')
             ->select('personas.idPersona', 'personas.nombre', 'personas.tipo_documento',
             'personas.num_documento', 'personas.direccion', 'personas.telefono',
-            'users.email', 'users.password', 'users.vigencia', 'users.idRol', 'rol.nombre as rol')
+            'users.email', 'users.password', 'users.vigencia', 'users.idRol', 'rol.nombre as rol',
+            'personas.idTipo', 'tipo.nombre as Tipo de Persona','personas.idArea', 'area.nombre as Area de Policia')
             ->orderBy('personas.idPersona', 'desc')
             ->paginate(5);
         }
@@ -64,6 +70,7 @@ class PersonaController extends Controller
             DB::beginTransaction();
             $personas = new Persona();
             $personas->nombre = $request->nombre;
+            $personas->apellidos = $request->apellidos;
             $personas->tipo_documento = $request->tipo_documento;
             $personas->num_documento = $request->num_documento;
             $personas->direccion = $request->direccion;
@@ -73,7 +80,7 @@ class PersonaController extends Controller
             $user->email = $request->usuario;
             $user->password = bcrypt($request->password);
             $user->vigencia = '1';
-            $user->idRoles = $request->idRoles;
+            $user->idRol = $request->idRol;
             $user->id = $persona->id;
             $user->save();
             DB::commit();
