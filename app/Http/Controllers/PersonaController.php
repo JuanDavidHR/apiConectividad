@@ -98,4 +98,51 @@ class PersonaController extends Controller
         }
         
     }
+
+    public function update(UserUpdateRequest $request)
+    {
+        //if (!$request->ajax()) return redirect('/');
+        try {
+            DB::beginTransaction();
+
+            $personas->nombre = $request->nombre;
+            $personas->apellidos = $request->apellidos;
+            $personas->tipo_documento = $request->tipo_documento;
+            $personas->num_documento = $request->num_documento;
+            $personas->direccion = $request->direccion;
+            $personas->telefono = $request->telefono;
+            $personas->idTipo = '1';
+            if($request->idTipo=='2'){
+                $personas->idTipo = $request->idTipo;
+                $personas->placa = $request->placa;
+                $personas->idArea = $request->idArea;
+            }
+            $personas->save();
+            $users =  new User();
+            $users->email = $request->email;
+            $users->password = Hash::make($request->password);
+            $users->vigencia = '1';
+            $users->idRol = $request->idRol;
+            $users->idPersona = $personas->idPersona;
+            $users->save();
+            DB::commit();
+        } catch (Exception $e) {
+            DB::rollback();
+        }
+    }
+    public function desactivar(Request $request)
+    {
+        //if(!$request->ajax()) return redirect('/');
+        $users = User::findOrFail($request->idPersona);//accedemos a cada una de las propiedades
+        $users->vigencia = '0';
+        $users->save();
+    }
+
+    public function activar(Request $request)
+    {
+        //if(!$request->ajax()) return redirect('/');
+        $users = User::findOrFail($request->idPersona);//accedemos a cada una de las propiedades
+        $users->vigencia = '1';
+        $users->save();
+    }
 }
