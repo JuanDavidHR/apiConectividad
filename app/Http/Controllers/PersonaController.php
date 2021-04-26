@@ -1,9 +1,11 @@
-<?php namespace App\Http\Controllers;
-
+<?php 
+namespace App\Http\Controllers;
+use Illuminate\Http\Request;
 use App\Models\Persona;
 use App\Models\User;
-use Illuminate\Http\Request;
-
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+//use App\Http\Requests\UserStoreRequest;
 class PersonaController extends Controller
 {
     public function index(Request $request)
@@ -14,24 +16,25 @@ class PersonaController extends Controller
         if ($buscar==''){
             $personas = User::join('personas', 'users.idPersona', '=', 'personas.idPersona')
             ->join('tipo', 'personas.idTipo', '=', 'tipo.idTipo')
-            ->join('area', 'users.idArea', '=', 'area.idArea')
+            ->leftjoin('area', 'personas.idArea', '=', 'area.idArea')
             ->join('rol', 'users.idRol', '=', 'rol.idRol')
             ->select('personas.idPersona', 'personas.nombre', 'personas.tipo_documento',
             'personas.num_documento', 'personas.direccion', 'personas.telefono',
             'users.email', 'users.password', 'users.vigencia', 'users.idRol', 'rol.nombre as rol',
-            'personas.idTipo', 'tipo.nombre as Tipo de Persona','personas.idArea', 'area.nombre as Area de Policia')
+            'personas.idTipo', 'tipo.nombre as Tipo de Persona','personas.idArea', 'area.nombre as Area de Policia','personas.placa')
             ->orderBy('personas.idPersona', 'desc')
             ->paginate(5);
         }
         else{
             $personas = User::join('personas', 'users.idPersona', '=', 'personas.idPersona')
             ->join('tipo', 'personas.idTipo', '=', 'tipo.idTipo')
-            ->join('area', 'personas.idArea', '=', 'area.idArea')
+            ->leftjoin('area', 'personas.idArea', '=', 'area.idArea')
             ->join('rol', 'users.idRol', '=', 'rol.idRol')
             ->select('personas.idPersona', 'personas.nombre', 'personas.tipo_documento',
             'personas.num_documento', 'personas.direccion', 'personas.telefono',
             'users.email', 'users.password', 'users.vigencia', 'users.idRol', 'rol.nombre as rol',
-            'personas.idTipo', 'tipo.nombre as Tipo de Persona','personas.idArea', 'area.nombre as Area de Policia')
+            'personas.idTipo', 'tipo.nombre as Tipo de Persona','personas.idArea', 'area.nombre as Area de Policia','personas.placa')
+            ->where('personas.'.$criterio, 'like', '%'. $buscar . '%')
             ->orderBy('personas.idPersona', 'desc')
             ->paginate(5);
         }
@@ -63,7 +66,7 @@ class PersonaController extends Controller
 
     }
 
-    public function store(UserStoreRequest $request)
+    public function store(Request $request)
     {
         //if (!$request->ajax()) return redirect('/');
         try {
@@ -75,14 +78,20 @@ class PersonaController extends Controller
             $personas->num_documento = $request->num_documento;
             $personas->direccion = $request->direccion;
             $personas->telefono = $request->telefono;
+            $personas->idTipo = '1';
+            if($request->idTipo=='2'){
+                $personas->idTipo = $request->idTipo;
+                $personas->placa = $request->placa;
+                $personas->idArea = $request->idArea;
+            }
             $personas->save();
-            $user =  new User();
-            $user->email = $request->usuario;
-            $user->password = bcrypt($request->password);
-            $user->vigencia = '1';
-            $user->idRol = $request->idRol;
-            $user->id = $persona->id;
-            $user->save();
+            $users =  new User();
+            $users->email = $request->email;
+            $users->password = Hash::make($request->password);
+            $users->vigencia = '1';
+            $users->idRol = $request->idRol;
+            $users->idPersona = $personas->idPersona;
+            $users->save();
             DB::commit();
         } catch (Exception $e) {
             DB::rollback();

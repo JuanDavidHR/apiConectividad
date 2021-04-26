@@ -61,4 +61,5 @@ $router->group(['prefix' => 'api'], function () use ($router) {
     // Matches "/api/persona
     $router->get('/persona', 'PersonaController@index');
     $router->get('/persona/{id}', 'PersonaController@getPersona');
+    $router->post('/persona/store', 'PersonaController@store');
 });
