@@ -24,7 +24,7 @@ class CreateRoboVehiculoTable extends Migration
             $table->string('modeloVehiculo', 50);
             $table->string('placaRodaje', 10)->unique();
             $table->string('numMotor', 10)->unique();
-            $table->text('hechos');            
+            $table->text('hechos');              
             $table->timestamps();
         });
     }

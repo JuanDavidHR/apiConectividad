@@ -14,7 +14,10 @@ class CreateReporteTable extends Migration
     public function up()
     {
         Schema::create('Reporte', function (Blueprint $table) {
-            $table->id();
+            $table->increments('idReporte');
+            $table->integer('idTipoReporte')->unsigned();
+            $table->foreign('idTipoReporte')->references('idTipoReporte')->on('tipo');
+            $table->integer('idArea')->unsigned()->nullable();
             $table->timestamps();
         });
     }
